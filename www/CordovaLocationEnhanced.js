@@ -46,6 +46,29 @@ var CordovaLocationEnhanced = {
      */
     clearWatch: function(watchId) {
         exec(null, null, 'CordovaLocationEnhanced', 'clearWatch', [watchId]);
+    },
+
+    /**
+     * Requests location permission from the user.
+     * @param {string} accuracyLevel - The desired accuracy level ('precise' or 'coarse').
+     * @param {Function} success - The callback function for a successful permission request.
+     * @param {Function} error - The callback function for a failed or denied permission request.
+     */
+    requestPermission: function (accuracyLevel, success, error) {
+        exec(success, error, "CordovaLocationEnhanced", "requestPermission", [accuracyLevel]);
+    },
+
+    /**
+     * Retrieves the user's current location once.
+     * @param {object} options - An object containing location request options.
+     * @param {string} options.accuracyLevel - The desired accuracy ('precise' or 'coarse'). Defaults to 'precise'.
+     * @param {number} options.timeout - The maximum time in milliseconds to wait for a location.
+     * @param {number} options.maximumAge - The maximum age in milliseconds of a cached location to be accepted.
+     * @param {Function} success - The callback function for a successful location retrieval.
+     * @param {Function} error - The callback function for a failed location retrieval.
+     */
+    getCurrentPosition: function (options, success, error) {
+        exec(success, error, "CordovaLocationEnhanced", "getCurrentPosition", [options]);
     }
 };
 
