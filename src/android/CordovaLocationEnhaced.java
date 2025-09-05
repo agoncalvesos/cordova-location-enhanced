@@ -1,4 +1,4 @@
-package com.yourcompany.cordova.locationenhaced;
+package com.outsystems.cordova.locationenhanced;
 
 import android.content.Context;
 import android.location.LocationManager;
@@ -7,7 +7,7 @@ import org.apache.cordova.CallbackContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-public class CordovaLocationEnhaced extends CordovaPlugin {
+public class CordovaLocationEnhanced extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {

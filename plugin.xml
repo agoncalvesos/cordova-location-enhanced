@@ -1,26 +1,26 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="cordova-location-enhaced" version="1.0.0" xmlns="http://cordova.apache.org/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
-    <name>CordovaLocationEnhaced</name>
-    <js-module name="CordovaLocationEnhaced" src="www/CordovaLocationEnhaced.js">
-        <clobbers target="cordova.plugins.CordovaLocationEnhaced" />
+<plugin id="cordova-location-enhanced" version="1.0.0" xmlns="http://cordova.apache.org/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>CordovaLocationEnhanced</name>
+    <js-module name="CordovaLocationEnhanced" src="www/CordovaLocationEnhanced.js">
+        <clobbers target="cordova.plugins.CordovaLocationEnhanced" />
     </js-module>
     <platform name="android">
         <config-file parent="/*" target="res/xml/config.xml">
-            <feature name="CordovaLocationEnhaced">
-                <param name="android-package" value="com.yourcompany.cordova.locationenhaced.CordovaLocationEnhaced" />
+            <feature name="CordovaLocationEnhanced">
+                <param name="android-package" value="com.outsystems.cordova.locationenhanced.CordovaLocationEnhanced" />
             </feature>
         </config-file>
         <config-file target="AndroidManifest.xml" parent="/*">
             <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
             <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
         </config-file>
-        <source-file src="src/android/CordovaLocationEnhaced.java" target-dir="src/com/yourcompany/cordova/locationenhaced" />
+        <source-file src="src/android/CordovaLocationEnhanced.java" target-dir="src/com/outsystems/cordova/locationenhanced" />
     </platform>
 
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
-            <feature name="CordovaLocationEnhaced">
-                <param name="ios-package" value="CordovaLocationEnhaced" />
+            <feature name="CordovaLocationEnhanced">
+                <param name="ios-package" value="CordovaLocationEnhanced" />
             </feature>
         </config-file>
         <config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
@@ -29,6 +29,6 @@
         <config-file target="*-Info.plist" parent="NSLocationAlwaysAndWhenInUseUsageDescription">
             <string>This app needs your location to provide features even when the app is in the background.</string>
         </config-file>
-        <source-file src="src/ios/CordovaLocationEnhaced.swift" />
+        <source-file src="src/ios/CordovaLocationEnhanced.swift" />
     </platform>
 </plugin>

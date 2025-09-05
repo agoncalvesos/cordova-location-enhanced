@@ -1,9 +1,9 @@
 {
-  "name": "cordova-location-enhaced",
+  "name": "cordova-location-enhanced",
   "version": "1.0.0",
   "description": "A Cordova plugin to check if location services are enabled on a device.",
   "cordova": {
-    "id": "cordova-location-enhaced",
+    "id": "cordova-location-enhanced",
     "platforms": [
       "android",
       "ios"
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/os-adv-dev/cordova-location-enhaced.git"
+    "url": "git+https://github.com/os-adv-dev/cordova-location-enhanced.git"
   },
   "keywords": [
     "cordova",
     "plugin",
     "location",
     "gps",
-    "enhaced"
+    "enhanced"
   ],
   "author": "André Gonçalves@OutSystems Native Experts",
   "license": "Apache-2.0"
