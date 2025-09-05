@@ -22,7 +22,7 @@
             <feature name="CordovaLocationEnhanced">
                 <param name="ios-package" value="CordovaLocationEnhanced" />
             </feature>
-             <preference name="SwiftVersion" value="5" />
+            <preference name="SwiftVersion" value="5" />
         </config-file>
         <config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
             <string>This app needs your location to provide features based on your current position.</string>

@@ -1,8 +1,8 @@
 import Foundation
 import CoreLocation
 
-@objc(CordovaLocationEnhaced)
-class CordovaLocationEnhaced: CDVPlugin, CLLocationManagerDelegate {
+@objc(CordovaLocationEnhanced)
+class CordovaLocationEnhanced: CDVPlugin, CLLocationManagerDelegate {
 
     private var locationManager: CLLocationManager?
     private var watchCallback: CDVInvokedUrlCommand?
@@ -15,7 +15,7 @@ class CordovaLocationEnhaced: CDVPlugin, CLLocationManagerDelegate {
         locationManager?.distanceFilter = 1.0 // Notify every 1 meter change
     }
 
-    @objc(isLocationEnabled)
+    @objc(isLocationEnabled:)
     func isLocationEnabled(_ command: CDVInvokedUrlCommand) {
         self.commandDelegate.run {
             let isEnabled = CLLocationManager.locationServicesEnabled()
@@ -31,7 +31,7 @@ class CordovaLocationEnhaced: CDVPlugin, CLLocationManagerDelegate {
         }
     }
 
-    @objc(getPermissionStatus)
+    @objc(getPermissionStatus:)
     func getPermissionStatus(_ command: CDVInvokedUrlCommand) {
         self.commandDelegate.run {
             let status = CLLocationManager.authorizationStatus()
@@ -58,7 +58,7 @@ class CordovaLocationEnhaced: CDVPlugin, CLLocationManagerDelegate {
         }
     }
 
-    @objc(getAccuracyLevel)
+    @objc(getAccuracyLevel:)
     func getAccuracyLevel(_ command: CDVInvokedUrlCommand) {
         self.commandDelegate.run {
             guard let locationManager = self.locationManager else {
@@ -89,7 +89,7 @@ class CordovaLocationEnhaced: CDVPlugin, CLLocationManagerDelegate {
         }
     }
 
-    @objc(watchLocation)
+    @objc(watchLocation:)
     func watchLocation(_ command: CDVInvokedUrlCommand) {
         self.commandDelegate.run {
             self.watchCallback = command
@@ -101,7 +101,7 @@ class CordovaLocationEnhaced: CDVPlugin, CLLocationManagerDelegate {
         }
     }
 
-    @objc(clearWatch)
+    @objc(clearWatch:)
     func clearWatch(_ command: CDVInvokedUrlCommand) {
         self.commandDelegate.run {
             self.locationManager?.stopUpdatingLocation()
@@ -130,13 +130,13 @@ class CordovaLocationEnhaced: CDVPlugin, CLLocationManagerDelegate {
         self.sendError(command.callbackId, message: "Location watch failed: \(error.localizedDescription)")
     }
 
-    private func sendSuccess(_ callbackId: String, message: Any? = nil) {
-        let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: message)
+    private func sendSuccess(_ callbackId: String, message: String? = "") {
+        let pluginResult = CDVPluginResult(status: .ok, messageAs: message)
         self.commandDelegate.send(pluginResult, callbackId: callbackId)
     }
 
     private func sendError(_ callbackId: String, message: String) {
-        let pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: message)
+        let pluginResult = CDVPluginResult(status: .error, messageAs: message)
         self.commandDelegate.send(pluginResult, callbackId: callbackId)
     }
 }

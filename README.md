@@ -1,4 +1,4 @@
-# cordova-location-enhaced
+# cordova-location-enhanced
 
 A Cordova plugin to check device location services, permission status, and continuously watch the user's location.
 
@@ -37,14 +37,14 @@ For iOS, you must add the following descriptions to your `config.xml` file. Thes
 
 ## Usage
 
-The plugin exposes a global `cordova.plugins.CordovaLocationEnhaced` object after the `deviceready` event has fired.
+The plugin exposes a global `cordova.plugins.CordovaLocationEnhanced` object after the `deviceready` event has fired.
 
 ### `isLocationEnabled()`
 
 Checks if the device's main location service is enabled.
 
 ```javascript
-cordova.plugins.CordovaLocationEnhaced.isLocationEnabled(
+cordova.plugins.CordovaLocationEnhanced.isLocationEnabled(
     function(isEnabled) {
         if (isEnabled) {
             console.log('Location services are enabled.');
@@ -63,7 +63,7 @@ cordova.plugins.CordovaLocationEnhaced.isLocationEnabled(
 Checks the app's location permission status.
 
 ```javascript
-cordova.plugins.CordovaLocationEnhaced.getPermissionStatus(
+cordova.plugins.CordovaLocationEnhanced.getPermissionStatus(
     function(result) {
         console.log('Permission Status: ' + result.status);
     },
@@ -78,7 +78,7 @@ cordova.plugins.CordovaLocationEnhaced.getPermissionStatus(
 Checks the granted accuracy level (Precise or Coarse).
 
 ```javascript
-cordova.plugins.CordovaLocationEnhaced.getAccuracyLevel(
+cordova.plugins.CordovaLocationEnhanced.getAccuracyLevel(
     function(result) {
         console.log('Accuracy Level: ' + result.accuracyLevel);
     },
@@ -93,7 +93,7 @@ cordova.plugins.CordovaLocationEnhaced.getAccuracyLevel(
 Starts watching the user's location for changes. This method returns a watch ID that you can use to clear the watch later.
 
 ```javascript
-var watchID = cordova.plugins.CordovaLocationEnhaced.watchLocation(
+var watchID = cordova.plugins.CordovaLocationEnhanced.watchLocation(
     function(location) {
         console.log('New location: Latitude ' + location.latitude + ', Longitude ' + location.longitude);
     },
@@ -109,4 +109,4 @@ Stops a specific location watch.
 
 ```javascript
 // Assuming you have a watchID from a previous call to watchLocation
-cordova.plugins.CordovaLocationEnhaced.clearWatch(watchID);
+cordova.plugins.CordovaLocationEnhanced.clearWatch(watchID);
