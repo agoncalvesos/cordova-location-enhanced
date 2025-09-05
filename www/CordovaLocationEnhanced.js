@@ -49,4 +49,45 @@ var CordovaLocationEnhanced = {
     }
 };
 
+/**
+ * @enum {string}
+ * An enumeration of possible location permission authorization statuses.
+ */
+const PermissionStatus = {
+    NOT_DETERMINED: "Not Determined",
+    RESTRICTED: "Restricted",
+    DENIED: "Denied",
+    AUTHORIZED_WHEN_IN_USE: "Authorized When In Use",
+    AUTHORIZED_ALWAYS: "Authorized Always",
+};
+
+/**
+ * @enum {string}
+ * An enumeration of possible location accuracy levels.
+ */
+const AccuracyLevel = {
+    PRECISE: "Precise",
+    COARSE: "Coarse",
+};
+
+/**
+ * @enum {string}
+ * An enumeration of possible location permission statuses, with accuracy details.
+ */
+const DetailedPermissionStatus = {
+    NOT_DETERMINED: "Not Determined",
+    RESTRICTED: "Restricted",
+    DENIED: "Denied",
+    GRANTED_PRECISE: "Granted (Precise)",
+    GRANTED_COARSE: "Granted (Coarse)",
+    GRANTED_WHEN_IN_USE_PRECISE: "Granted (When In Use, Precise)",
+    GRANTED_WHEN_IN_USE_COARSE: "Granted (When In Use, Coarse)",
+    GRANTED_ALWAYS_PRECISE: "Granted (Always, Precise)",
+    GRANTED_ALWAYS_COARSE: "Granted (Always, Coarse)"
+};
+
+exports.PermissionStatus = PermissionStatus;
+exports.AccuracyLevel = AccuracyLevel;
+exports.DetailedPermissionStatus = DetailedPermissionStatus;
+
 module.exports = CordovaLocationEnhanced;
