@@ -8,8 +8,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
+
+import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 public class CordovaLocationEnhanced extends CordovaPlugin {
 
@@ -30,14 +34,19 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
 
     private LocationManager locationManager;
     private Map<String, CallbackContext> watchCallbacks = new HashMap<>();
-    private LocationListener locationListener;
+    private LocationListener watchLocationListener;
     private CallbackContext permissionCallback;
-
 
     private ScheduledExecutorService timeoutExecutor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> currentPositionTimeout;
     private CallbackContext currentPositionCallback;
     private LocationListener currentPositionListener;
+
+    @Override
+    public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+        super.initialize(cordova, webView);
+        this.locationManager = (LocationManager) this.cordova.getActivity().getSystemService(Context.LOCATION_SERVICE);
+    }
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -77,10 +86,9 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
                 boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
                 boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
                 boolean isLocationEnabled = isGpsEnabled || isNetworkEnabled;
-
                 callbackContext.success(isLocationEnabled ? 1 : 0);
             } catch (Exception e) {
-                callbackContext.error("Error checking location status: " + e.getMessage());
+                sendError(callbackContext, "LOCATION_ERROR", "Error checking location status: " + e.getMessage());
             }
         });
     }
@@ -91,8 +99,8 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
                 Context context = this.cordova.getActivity().getApplicationContext();
                 JSONObject result = new JSONObject();
 
-                int fineLocation = ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION);
-                int coarseLocation = ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION);
+                int fineLocation = ContextCompat.checkSelfPermission(context, FINE_LOCATION);
+                int coarseLocation = ContextCompat.checkSelfPermission(context, COARSE_LOCATION);
 
                 if (fineLocation == PackageManager.PERMISSION_GRANTED) {
                     result.put("status", "Granted (Precise)");
@@ -101,10 +109,9 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
                 } else {
                     result.put("status", "Denied");
                 }
-
                 callbackContext.success(result);
             } catch (Exception e) {
-                callbackContext.error("Error getting permission status: " + e.getMessage());
+                sendError(callbackContext, "PERMISSION_ERROR", "Error getting permission status: " + e.getMessage());
             }
         });
     }
@@ -115,33 +122,38 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
                 Context context = this.cordova.getActivity().getApplicationContext();
                 JSONObject result = new JSONObject();
 
-                int fineLocation = ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION);
+                int fineLocation = ContextCompat.checkSelfPermission(context, FINE_LOCATION);
 
                 if (fineLocation == PackageManager.PERMISSION_GRANTED) {
                     result.put("accuracyLevel", "Precise");
                 } else {
                     result.put("accuracyLevel", "Approximate");
                 }
-
                 callbackContext.success(result);
             } catch (Exception e) {
-                callbackContext.error("Error getting accuracy level: " + e.getMessage());
+                sendError(callbackContext, "ACCURACY_ERROR", "Error getting accuracy level: " + e.getMessage());
             }
         });
     }
 
-    private void watchLocation(CallbackContext callbackContext) {
+    private void watchLocation(final CallbackContext callbackContext) {
         cordova.getThreadPool().execute(() -> {
             try {
-                final String watchId = callbackContext.getCallbackId();
+                if (!hasPermissions(new String[]{FINE_LOCATION, COARSE_LOCATION})) {
+                    sendError(callbackContext, "PERMISSION_DENIED", "Location permission not granted.");
+                    return;
+                }
+
+                final String watchId = UUID.randomUUID().toString();
+                watchCallbacks.put(watchId, callbackContext);
 
                 // If a watch is already active, remove the old listener
-                if (this.locationListener != null) {
-                    locationManager.removeUpdates(this.locationListener);
+                if (this.watchLocationListener != null) {
+                    locationManager.removeUpdates(this.watchLocationListener);
                 }
 
                 // Create a new location listener
-                this.locationListener = new LocationListener() {
+                this.watchLocationListener = new LocationListener() {
                     @Override
                     public void onLocationChanged(Location location) {
                         try {
@@ -149,26 +161,37 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
                             result.put("latitude", location.getLatitude());
                             result.put("longitude", location.getLongitude());
                             result.put("accuracy", location.getAccuracy());
+                            result.put("altitude", location.getAltitude());
+                            result.put("timestamp", location.getTime());
 
                             PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
-                            pluginResult.setKeepCallback(true); // Keep the callback active
+                            pluginResult.setKeepCallback(true);
                             callbackContext.sendPluginResult(pluginResult);
                         } catch (JSONException e) {
-                            callbackContext.error("JSON Exception: " + e.getMessage());
+                            sendError(callbackContext, "JSON_ERROR", "JSON Exception: " + e.getMessage());
                         }
+                    }
+                    @Override
+                    public void onStatusChanged(String provider, int status, Bundle extras) {}
+                    @Override
+                    public void onProviderEnabled(String provider) {}
+                    @Override
+                    public void onProviderDisabled(String provider) {
+                        sendError(callbackContext, "PROVIDER_DISABLED", "Location provider " + provider + " is disabled.");
                     }
                 };
 
                 // Request location updates
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this.locationListener);
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, this.locationListener);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this.watchLocationListener);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, this.watchLocationListener);
 
-                watchCallbacks.put(watchId, callbackContext);
-
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, watchId);
+                pluginResult.setKeepCallback(true);
+                callbackContext.sendPluginResult(pluginResult);
             } catch (SecurityException e) {
-                callbackContext.error("Location permission not granted: " + e.getMessage());
+                sendError(callbackContext, "PERMISSION_DENIED", "Location permission not granted: " + e.getMessage());
             } catch (Exception e) {
-                callbackContext.error("Error watching location: " + e.getMessage());
+                sendError(callbackContext, "WATCH_ERROR", "Error watching location: " + e.getMessage());
             }
         });
     }
@@ -176,13 +199,17 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
     private void clearWatch(String watchId, CallbackContext callbackContext) {
         cordova.getThreadPool().execute(() -> {
             if (watchCallbacks.containsKey(watchId)) {
-                if (this.locationListener != null) {
-                    locationManager.removeUpdates(this.locationListener);
+                // If this is the last watch, stop location updates
+                if (watchCallbacks.size() == 1) {
+                    if (this.watchLocationListener != null) {
+                        locationManager.removeUpdates(this.watchLocationListener);
+                        this.watchLocationListener = null;
+                    }
                 }
                 watchCallbacks.remove(watchId);
                 callbackContext.success("Location watch cleared.");
             } else {
-                callbackContext.error("Watch ID not found.");
+                sendError(callbackContext, "WATCH_NOT_FOUND", "Watch ID not found.");
             }
         });
     }
@@ -198,7 +225,7 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
         }
 
         if (hasPermissions(permissions)) {
-            this.permissionCallback.success("Permission already granted.");
+            this.permissionCallback.success("Permissions already granted.");
         } else {
             cordova.requestPermissions(this, REQUEST_LOCATION_PERMISSIONS, permissions);
         }
@@ -218,7 +245,7 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
                 if (allGranted) {
                     permissionCallback.success("Permissions granted.");
                 } else {
-                    permissionCallback.error("Permissions denied by user.");
+                    sendError(permissionCallback, "PERMISSION_DENIED", "Permissions denied by user.");
                 }
             }
         }
@@ -236,26 +263,23 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
     private void getCurrentPosition(final JSONObject options, final CallbackContext callbackContext) {
         cordova.getThreadPool().execute(() -> {
             try {
-                // Parse options
                 long timeout = options.optLong("timeout", 0);
                 long maxAge = options.optLong("maximumAge", 0);
                 String accuracyLevel = options.optString("accuracyLevel", "precise");
 
                 if (!hasPermissions(new String[]{FINE_LOCATION, COARSE_LOCATION})) {
-                    callbackContext.error("Location permission not granted.");
+                    sendError(callbackContext, "PERMISSION_DENIED", "Location permission not granted.");
                     return;
                 }
 
                 String provider = "precise".equalsIgnoreCase(accuracyLevel) ? LocationManager.GPS_PROVIDER : LocationManager.NETWORK_PROVIDER;
                 Location lastLocation = locationManager.getLastKnownLocation(provider);
 
-                // Check if last known location is fresh enough
                 if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime()) < maxAge) {
                     sendLocationResult(lastLocation, callbackContext);
                     return;
                 }
 
-                // If not fresh, request a single update
                 currentPositionCallback = callbackContext;
                 currentPositionListener = new LocationListener() {
                     @Override
@@ -263,17 +287,14 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
                         stopCurrentPositionUpdates();
                         sendLocationResult(location, currentPositionCallback);
                     }
-
                     @Override
                     public void onStatusChanged(String provider, int status, Bundle extras) {}
-
                     @Override
                     public void onProviderEnabled(String provider) {}
-
                     @Override
                     public void onProviderDisabled(String provider) {
                         stopCurrentPositionUpdates();
-                        currentPositionCallback.error("Provider disabled.");
+                        sendError(currentPositionCallback, "PROVIDER_DISABLED", "Location provider " + provider + " is disabled.");
                     }
                 };
 
@@ -282,12 +303,13 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
                 if (timeout > 0) {
                     currentPositionTimeout = timeoutExecutor.schedule(() -> {
                         stopCurrentPositionUpdates();
-                        currentPositionCallback.error("Timeout getting location.");
+                        sendError(currentPositionCallback, "TIMEOUT", "Timeout getting location.");
                     }, timeout, TimeUnit.MILLISECONDS);
                 }
-
             } catch (SecurityException e) {
-                callbackContext.error("Location permission not granted: " + e.getMessage());
+                sendError(callbackContext, "PERMISSION_DENIED", "Location permission not granted: " + e.getMessage());
+            } catch (Exception e) {
+                sendError(callbackContext, "GET_CURRENT_POSITION_ERROR", "Error getting current position: " + e.getMessage());
             }
         });
     }
@@ -302,7 +324,7 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
             jsonLocation.put("timestamp", location.getTime());
             callbackContext.success(jsonLocation);
         } catch (JSONException e) {
-            callbackContext.error("Error creating JSON response: " + e.getMessage());
+            sendError(callbackContext, "JSON_ERROR", "Error creating JSON response: " + e.getMessage());
         }
     }
 
@@ -317,4 +339,16 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
         }
     }
 
+    private void sendError(CallbackContext callbackContext, String errorCode, String errorMessage) {
+        try {
+            JSONObject errorObject = new JSONObject();
+            errorObject.put("errorCode", errorCode);
+            errorObject.put("errorMessage", errorMessage);
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, errorObject);
+            callbackContext.sendPluginResult(pluginResult);
+        } catch (JSONException e) {
+            // Fallback in case JSON fails
+            callbackContext.error("Error creating JSON response for error: " + e.getMessage());
+        }
+    }
 }
