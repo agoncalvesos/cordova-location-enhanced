@@ -89,7 +89,7 @@ class CordovaLocationEnhanced: CDVPlugin {
             let watchId = command.arguments[0] as? String ?? UUID().uuidString
             self.watchCallbacks[watchId] = command
             
-            // Setting the desired accuracy here is a best practice.            
+            // Setting the desired accuracy here is a best practice.
             self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
             self.locationManager.startUpdatingLocation()
 
@@ -103,7 +103,7 @@ class CordovaLocationEnhanced: CDVPlugin {
     func clearWatch(_ command: CDVInvokedUrlCommand) {
         self.commandDelegate.run {
             guard let watchId = command.arguments[0] as? String else {
-                sendError(command: command, errorCode: "INVALID_WATCH_ID", errorMessage: "Invalid watch ID.")
+                self.sendError(command: command, errorCode: "INVALID_WATCH_ID", errorMessage: "Invalid watch ID.")
                 return
             }
             
@@ -158,11 +158,11 @@ class CordovaLocationEnhanced: CDVPlugin {
     func getCurrentPosition(_ command: CDVInvokedUrlCommand) {
         self.commandDelegate.run {
             guard self.locationManager.authorizationStatus != .notDetermined else {
-                sendError(command: command, errorCode: "PERMISSION_DENIED", errorMessage: "Location permission not granted.")
+                self.sendError(command: command, errorCode: "PERMISSION_DENIED", errorMessage: "Location permission not granted.")
                 return
             }
             guard let options = command.arguments[0] as? [String: Any] else {
-                sendError(command: command, errorCode: "INVALID_OPTIONS", errorMessage: "Invalid options provided.")
+                self.sendError(command: command, errorCode: "INVALID_OPTIONS", errorMessage: "Invalid options provided.")
                 return
             }
 
