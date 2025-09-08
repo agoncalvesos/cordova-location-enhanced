@@ -182,8 +182,8 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
                 };
 
                 // Request location updates
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this.watchLocationListener);
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, this.watchLocationListener);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, this.watchLocationListener, cordova.getActivity().getMainLooper());
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, this.watchLocationListener, cordova.getActivity().getMainLooper());
 
                 PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, watchId);
                 pluginResult.setKeepCallback(true);
@@ -298,7 +298,7 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
                     }
                 };
 
-                locationManager.requestSingleUpdate(provider, currentPositionListener, null);
+                locationManager.requestSingleUpdate(provider, currentPositionListener, cordova.getActivity().getMainLooper());
 
                 if (timeout > 0) {
                     currentPositionTimeout = timeoutExecutor.schedule(() -> {

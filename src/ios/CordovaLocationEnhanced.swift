@@ -137,12 +137,12 @@ class CordovaLocationEnhanced: CDVPlugin {
             if accuracyLevel == "always" {
                 self.locationManager.requestAlwaysAuthorization()
             } else {
-                let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: "Permissions already granted for When In Use.")
+                let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: ["status": "Authorized When In Use"])
                 self.commandDelegate.send(pluginResult, callbackId: command.callbackId)
                 self.permissionCommand = nil
             }
         case .authorizedAlways:
-            let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: "Permissions already granted for Always.")
+            let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: ["status": "Permissions already granted for Always."])
             self.commandDelegate.send(pluginResult, callbackId: command.callbackId)
             self.permissionCommand = nil
         case .denied, .restricted:
