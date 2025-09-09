@@ -236,7 +236,7 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
         if (requestCode == REQUEST_LOCATION_PERMISSIONS) {
             boolean atLeastOneGranted = false;
             for (int result : grantResults) {
-                if (result == PackageManager.PERMISSION_DENIED) {
+                if (result == PackageManager.PERMISSION_GRANTED) {
                     atLeastOneGranted = true;
                     break;
                 }
