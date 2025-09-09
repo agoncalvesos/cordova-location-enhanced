@@ -64,17 +64,13 @@ class CordovaLocationEnhanced: CDVPlugin {
         self.commandDelegate.run {
             var accuracyLevel: String
             
-            if #available(iOS 14.0, *) {
-                switch self.locationManager.accuracyAuthorization {
-                case .fullAccuracy:
-                    accuracyLevel = "Precise"
-                case .reducedAccuracy:
-                    accuracyLevel = "Coarse"
-                @unknown default:
-                    accuracyLevel = "Unknown"
-                }
-            } else {
+            switch self.locationManager.accuracyAuthorization {
+            case .fullAccuracy:
                 accuracyLevel = "Precise"
+            case .reducedAccuracy:
+                accuracyLevel = "Coarse"
+            @unknown default:
+                accuracyLevel = "Unknown"
             }
             
             let result: [String: String] = ["accuracyLevel": accuracyLevel]
@@ -221,19 +217,11 @@ extension CordovaLocationEnhanced: CLLocationManagerDelegate {
         case .notDetermined, .restricted, .denied:
             result = ["status": "Denied"]
         case .authorizedWhenInUse:
-            if #available(iOS 14.0, *) {
-                let accuracy = manager.accuracyAuthorization == .fullAccuracy ? "Precise" : "Coarse"
-                result = ["status": "Authorized When In Use", "accuracy": accuracy]
-            } else {
-                result = ["status": "Authorized When In Use", "accuracy": "Precise"]
-            }
+            let accuracy = manager.accuracyAuthorization == .fullAccuracy ? "Precise" : "Coarse"
+            result = ["status": "Authorized When In Use", "accuracy": accuracy]
         case .authorizedAlways:
-            if #available(iOS 14.0, *) {
-                let accuracy = manager.accuracyAuthorization == .fullAccuracy ? "Precise" : "Coarse"
-                result = ["status": "Authorized Always", "accuracy": accuracy]
-            } else {
-                result = ["status": "Authorized Always", "accuracy": "Precise"]
-            }
+            let accuracy = manager.accuracyAuthorization == .fullAccuracy ? "Precise" : "Coarse"
+            result = ["status": "Authorized Always", "accuracy": accuracy]
         @unknown default:
             result = ["status": "Unknown"]
         }

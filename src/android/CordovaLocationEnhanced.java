@@ -234,15 +234,15 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
     @Override
     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == REQUEST_LOCATION_PERMISSIONS) {
-            boolean allGranted = true;
+            boolean atLeastOneGranted = false;
             for (int result : grantResults) {
                 if (result == PackageManager.PERMISSION_DENIED) {
-                    allGranted = false;
+                    atLeastOneGranted = true;
                     break;
                 }
             }
             if (permissionCallback != null) {
-                if (allGranted) {
+                if (atLeastOneGranted) {
                     permissionCallback.success("Permissions granted.");
                 } else {
                     sendError(permissionCallback, "PERMISSION_DENIED", "Permissions denied by user.");
@@ -253,11 +253,11 @@ public class CordovaLocationEnhanced extends CordovaPlugin {
 
     private boolean hasPermissions(String[] permissions) {
         for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this.cordova.getActivity(), permission) != PackageManager.PERMISSION_GRANTED) {
-                return false;
+            if (ContextCompat.checkSelfPermission(this.cordova.getActivity(), permission) == PackageManager.PERMISSION_GRANTED) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     private void getCurrentPosition(final JSONObject options, final CallbackContext callbackContext) {
